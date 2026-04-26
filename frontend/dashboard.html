@@ -6,9 +6,7 @@
     <title>Dashboard - Finance Analyzer</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2pdf for downloading report -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
@@ -26,6 +24,9 @@
                 <li><a href="#" id="nav-add-expense">Add Expense</a></li>
                 <li><a href="#" id="nav-expenses">View Expenses</a></li>
                 <li><a href="#" id="nav-budget">Budget Settings</a></li>
+                <li><a href="#" id="nav-categories">Manage Categories</a></li>
+                <li><a href="#" id="nav-stats">Statistics</a></li>
+                <li><a href="#" id="nav-comparison">Monthly Compare</a></li>
             </ul>
             <div class="sidebar-footer">
                 <button id="logoutBtn" class="btn btn-outline">Logout</button>
@@ -89,6 +90,14 @@
                         </div>
                     </div>
 
+                    <!-- Budget Alerts Section -->
+                    <div id="budget-alerts-container" class="budget-alerts-section" style="display:none;">
+                        <div class="section-header-row">
+                            <h3 class="section-title">🔔 Budget Alerts</h3>
+                        </div>
+                        <div id="budget-alerts-list" class="alerts-grid"></div>
+                    </div>
+
                     <!-- Charts Area -->
                     <div class="charts-container">
                         <div class="card glass chart-card">
@@ -118,9 +127,7 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Category</label>
-                                    <select id="expCategory" required>
-                                        <!-- Will be populated from DB -->
-                                    </select>
+                                    <select id="expCategory" required></select>
                                 </div>
                                 <div class="form-group">
                                     <label>Billing Month</label>
@@ -168,9 +175,7 @@
                                         <th>Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody id="expensesTableBody">
-                                    <!-- Populated dynamically -->
-                                </tbody>
+                                <tbody id="expensesTableBody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -205,6 +210,113 @@
                             </div>
                             <button type="submit" class="btn btn-primary full-width">Update Budget</button>
                         </form>
+                    </div>
+                </div>
+
+                <!-- Manage Categories View -->
+                <div id="view-categories" class="view" style="display: none;">
+                    <div class="card glass form-card">
+                        <h3>Manage Categories</h3>
+                        <p>Add or remove expense categories.</p>
+                        <form id="addCategoryForm" style="margin-bottom: 24px;">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:3;">
+                                    <label>New Category Name</label>
+                                    <input type="text" id="newCategoryName" required placeholder="e.g. Healthcare">
+                                </div>
+                                <div class="form-group" style="flex:1; display:flex; align-items:flex-end;">
+                                    <button type="submit" class="btn btn-primary full-width">Add</button>
+                                </div>
+                            </div>
+                        </form>
+                        <h4 style="color: #cbd5e1; margin-bottom: 16px;">Existing Categories</h4>
+                        <div id="categoriesList" class="categories-list"></div>
+                    </div>
+                </div>
+
+                <!-- Statistics View -->
+                <div id="view-stats" class="view" style="display: none;">
+                    <div class="stats-grid" id="statsContent">
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">📊</div>
+                            <span class="stat-label">Avg Daily Spend</span>
+                            <strong id="statAvgDaily" class="stat-value">₹0</strong>
+                        </div>
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">🔺</div>
+                            <span class="stat-label">Highest Spend Day</span>
+                            <strong id="statHighestDay" class="stat-value">N/A</strong>
+                            <small id="statHighestDayAmount" class="stat-sub"></small>
+                        </div>
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">🔻</div>
+                            <span class="stat-label">Lowest Spend Day</span>
+                            <strong id="statLowestDay" class="stat-value">N/A</strong>
+                            <small id="statLowestDayAmount" class="stat-sub"></small>
+                        </div>
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">📅</div>
+                            <span class="stat-label">Active Expense Days</span>
+                            <strong id="statActiveDays" class="stat-value">0</strong>
+                        </div>
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">⭐</div>
+                            <span class="stat-label">Most Frequent Category</span>
+                            <strong id="statFreqCategory" class="stat-value">N/A</strong>
+                        </div>
+                        <div class="card glass stat-detail-card">
+                            <div class="stat-icon">💰</div>
+                            <span class="stat-label">Avg Transaction Amount</span>
+                            <strong id="statAvgTransaction" class="stat-value">₹0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Comparison View -->
+                <div id="view-comparison" class="view" style="display: none;">
+                    <div class="card glass form-card" style="max-width: 800px;">
+                        <h3>Monthly Expense Comparison</h3>
+                        <p>Compare spending between two months.</p>
+                        <form id="comparisonForm" style="margin-bottom: 24px;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Current Month</label>
+                                    <select id="compareCurrentMonth" required>
+                                        <option value="January">January</option>
+                                        <option value="February">February</option>
+                                        <option value="March">March</option>
+                                        <option value="April">April</option>
+                                        <option value="May">May</option>
+                                        <option value="June">June</option>
+                                        <option value="July">July</option>
+                                        <option value="August">August</option>
+                                        <option value="September">September</option>
+                                        <option value="October">October</option>
+                                        <option value="November">November</option>
+                                        <option value="December">December</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Previous Month</label>
+                                    <select id="comparePreviousMonth" required>
+                                        <option value="January">January</option>
+                                        <option value="February">February</option>
+                                        <option value="March">March</option>
+                                        <option value="April">April</option>
+                                        <option value="May">May</option>
+                                        <option value="June">June</option>
+                                        <option value="July">July</option>
+                                        <option value="August">August</option>
+                                        <option value="September">September</option>
+                                        <option value="October">October</option>
+                                        <option value="November">November</option>
+                                        <option value="December">December</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary full-width">Compare</button>
+                        </form>
+                        <div id="comparisonResult" style="display:none;"></div>
                     </div>
                 </div>
 
